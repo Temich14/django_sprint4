@@ -1,12 +1,78 @@
 {% extends "base.html" %}
-{% block title %}
-{{ post.title }} | {% if post.location and post.location.is_published %}{{ post.location.name }} |{% endif %} {{ post.pub_date|date:"d E Y" }}
-{% endblock %}
+{% load django_bootstrap5 %}
+{% block title %}{{ post.title }}{% endblock %}
 {% block content %}
-  <article>
-    <p>{{ post.pub_date|date:"d E Y" }} | {% if post.location and post.location.is_published %}{{ post.location.name }}{% else %}Планета Земля{% endif %}<br>
-      <small>От автора @{{ post.author.username }} в категории {% include "includes/category_link.html" %}</small></p>
-    <h3>{{ post.title }}</h3>
-    <p>{{ post.text|linebreaksbr }}</p>
-  </article> 
+  <article class="mb-5">
+    <div class="card">
+      {% if post.image %}
+        <img src="{{ post.image.url }}" class="card-img-top">
+      {% endif %}
+      <div class="card-body">
+        <h1 class="card-title">{{ post.title }}</h1>
+        <div class="card-text">{{ post.text|linebreaks }}</div>
+      </div>
+      <div class="card-footer text-muted">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <span>{{ post.pub_date|date:"d.m.Y H:i" }}</span>
+            {% if post.location and post.location.is_published %}
+              <span>{{ post.location.name }}</span>
+            {% endif %}
+          </div>
+          <div>
+            Автор: <a href="{% url 'blog:profile' post.author.username %}">{{ post.author.get_full_name|default:post.author.username }}</a>
+          </div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center mt-1">
+          <div>
+            Категория: <a href="{% url 'blog:category_posts' post.category.slug %}">{{ post.category.title }}</a>
+          </div>
+          {% if user == post.author %}
+            <div>
+              <a href="{% url 'blog:edit_post' post.id %}" class="btn btn-outline-primary btn-sm">Редактировать</a>
+              <a href="{% url 'blog:delete_post' post.id %}" class="btn btn-outline-danger btn-sm">Удалить</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- Комментарии -->
+  <div class="mb-5">
+    <h3>Комментарии</h3>
+    
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'blog:add_comment' post.id %}">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        <button type="submit" class="btn btn-primary">Добавить комментарий</button>
+      </form>
+      <hr>
+    {% endif %}
+
+    {% for comment in comments %}
+      <div class="card mb-3">
+        <div class="card-body">
+          <div class="card-text">{{ comment.text|linebreaks }}</div>
+        </div>
+        <div class="card-footer text-muted">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <span>{{ comment.created_at|date:"d.m.Y H:i" }}</span>
+              <span>Автор: {{ comment.author.get_full_name|default:comment.author.username }}</span>
+            </div>
+            {% if user == comment.author %}
+              <div>
+                <a href="{% url 'blog:edit_comment' post.id comment.id %}" class="btn btn-outline-primary btn-sm">Редактировать</a>
+                <a href="{% url 'blog:delete_comment' post.id comment.id %}" class="btn btn-outline-danger btn-sm">Удалить</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p>Комментариев пока нет.</p>
+    {% endfor %}
+  </div>
 {% endblock %}

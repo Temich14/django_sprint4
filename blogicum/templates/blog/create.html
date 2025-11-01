@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {% if post %}Редактирование поста{% else %}Написать пост{% endif %}
+{% endblock %}
+{% block content %}
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        {% if post %}
+          <h1>Редактирование поста</h1>
+          {% if request.resolver_match.url_name == 'delete_post' %}
+            <h2>Удаление поста</h2>
+            <p>Вы уверены, что хотите удалить пост "{{ post.title }}"?</p>
+            <form method="post">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-danger">Удалить</button>
+              <a href="{% url 'blog:post_detail' post.id %}" class="btn btn-secondary">Отмена</a>
+            </form>
+          {% else %}
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              {% bootstrap_form form %}
+              <button type="submit" class="btn btn-primary">Сохранить</button>
+              <a href="{% url 'blog:post_detail' post.id %}" class="btn btn-secondary">Отмена</a>
+            </form>
+          {% endif %}
+        {% else %}
+          <h1>Написать пост</h1>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button type="submit" class="btn btn-primary">Опубликовать</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

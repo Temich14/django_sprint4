@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% load django_bootstrap5 %}
+{% block title %}
+  {% if request.resolver_match.url_name == 'delete_comment' %}Удаление комментария{% else %}Редактирование комментария{% endif %}
+{% endblock %}
+{% block content %}
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        {% if request.resolver_match.url_name == 'delete_comment' %}
+          <h1>Удаление комментария</h1>
+          <p>Вы уверены, что хотите удалить этот комментарий?</p>
+          <div class="card mb-3">
+            <div class="card-body">
+              <div class="card-text">{{ comment.text|linebreaks }}</div>
+            </div>
+          </div>
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Удалить</button>
+            <a href="{% url 'blog:post_detail' comment.post.id %}" class="btn btn-secondary">Отмена</a>
+          </form>
+        {% else %}
+          <h1>Редактирование комментария</h1>
+          <form method="post">
+            {% csrf_token %}
+            {% bootstrap_form form %}
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a href="{% url 'blog:post_detail' comment.post.id %}" class="btn btn-secondary">Отмена</a>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

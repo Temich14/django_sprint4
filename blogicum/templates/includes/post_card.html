@@ -1,13 +1,32 @@
-<div class="card" style="width: 40rem;">
+<div class="card">
+  {% if post.image %}
+    <img src="{{ post.image.url }}" class="card-img-top">
+  {% endif %}
   <div class="card-body">
-    <h5 class="card-title">{{ post.title }}</h5>
-    <h6 class="card-subtitle mb-2 text-muted">
-      <small>
-        {{ post.pub_date|date:"d E Y" }} | {% if post.location and post.location.is_published %}{{ post.location.name }}{% else %}Планета Земля{% endif %}<br>
-        От автора @{{ post.author.username }} в категории {% include "includes/category_link.html" %}
-      </small>
-    </h6>
-    <p class="card-text">{{ post.text|truncatewords:10 }}</p>
-    <a href="{% url 'blog:post_detail' post.id %}" class="card-link">Читать полный текст</a>
+    <h2 class="card-title">
+      <a class="text-reset text-decoration-none" href="{% url 'blog:post_detail' post.id %}">{{ post.title }}</a>
+    </h2>
+    <div class="card-text">{{ post.text|truncatewords:10 }}</div>
+  </div>
+  <div class="card-footer text-muted">
+    <div class="d-flex justify-content-between align-items-center">
+      <div>
+        <span>{{ post.pub_date|date:"d.m.Y H:i" }}</span>
+        {% if post.location and post.location.is_published %}
+          <span>{{ post.location.name }}</span>
+        {% endif %}
+      </div>
+      <div>
+        Автор: <a href="{% url 'blog:profile' post.author.username %}">{{ post.author.get_full_name|default:post.author.username }}</a>
+      </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-1">
+      <div>
+        Категория: <a href="{% url 'blog:category_posts' post.category.slug %}">{{ post.category.title }}</a>
+      </div>
+      <div>
+        <span class="text-muted">({{ post.comment_count|default:0 }})</span>
+      </div>
+    </div>
   </div>
 </div>
